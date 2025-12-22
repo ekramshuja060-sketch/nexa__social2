@@ -1,0 +1,37 @@
+{% for post in posts %}
+<div class="card p-4 my-3" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(15px); border-radius:20px; animation: fadeUp 0.6s;">
+  <h6>@{{ post.user.username }}</h6>
+  <p>{{ post.body }}</p>
+  <small>{{ post.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+
+  <div class="mt-2">
+    <!-- Like -->
+    <a href="{{ url_for('like_post', post_id=post.id) }}" class="btn btn-sm btn-outline-light">
+      ❤️ {{ post.likes.count() }}
+    </a>
+
+    <!-- Comment Form -->
+    <form method="POST" action="{{ url_for('comment_post', post_id=post.id) }}" class="d-inline">
+      <input type="text" name="comment" placeholder="کامنت..." class="form-control form-control-sm d-inline w-75">
+      <button class="btn btn-sm btn-light">ارسال</button>
+    </form>
+
+    <!-- Comments -->
+    <div class="mt-2">
+      {% for comment in post.comments %}
+      <div style="padding-left:10px;">
+        <small>@{{ comment.user.username }}: {{ comment.body }}</small>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+<style>
+  @keyframes fadeUp {
+  from {opacity:0; transform:translateY(20px);}
+  to {opacity:1; transform:translateY(0);}
+}
+  
+</style>
