@@ -1,0 +1,193 @@
+<a href="{{ url_for('new_post') }}" class="btn btn-success mb-3">➕ پست جدید</a>
+<form action="{{ url_for('edit_post', post_id=post.id) }}" method="get" style="display:inline;">
+  <button type="submit" class="btn btn-sm btn-warning">✏️ ویرایش</button>
+</form>
+
+<form action="{{ url_for('delete_post', post_id=post.id) }}" method="post" style="display:inline;" onsubmit="return confirm('آیا مطمئن هستید که می‌خواهید این پست را حذف کنید؟');">
+  <button type="submit" class="btn btn-sm btn-danger">🗑️ حذف</button>
+</form>
+
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexa Social</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+    /* افکت قلب و کامنت */
+    .animate-like, .animate-comment {
+      position: absolute;
+      font-size: 24px;
+      pointer-events: none;
+      opacity: 1;
+      transform: scale(1);
+      animation: pop 0.8s forwards;
+    }
+
+    @keyframes pop {
+      0% { opacity:1; transform: scale(1) translateY(0); }
+      50% { transform: scale(1.5) translateY(-20px); }
+      100% { opacity:0; transform: scale(2) translateY(-50px); }
+    }
+
+    .post-container { position: relative; }
+    </style>
+</head>
+<body>
+<div class="container mt-5 text-center">
+    <h3>🔥 Server is Running</h3>
+    <p>Your social platform is alive.</p>
+    <button class="btn btn-primary btn-lg mt-3">Get Started</button>
+</div>
+
+<div class="container mt-5">
+    <h2>📰 Feed</h2>
+    {% for post in posts %}
+    <div class="card mb-4 post-container">
+        {% if post.image_url %}
+        <img src="{{ post.image_url }}" class="card-img-top" alt="Post image">
+        {% endif %}
+        <div class="card-body">
+            <h5 class="card-title">{{ post.user }}</h5>
+            <p class="card-text">{{ post.content }}</p>
+            <p>❤️ {{ post.likes }} | 💬 {{ post.comments }}</p>
+
+            <form action="{{ url_for('like', post_id=post.id) }}" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-sm btn-danger btn-like">❤️ Like</button>
+            </form>
+
+            <form action="{{ url_for('comment', post_id=post.id) }}" method="post" style="display:inline;">
+                <input type="text" name="comment" placeholder="کامنت..." required>
+                <button type="submit" class="btn btn-sm btn-primary btn-comment">💬 Comment</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+function animateLike(e) {
+    const heart = document.createElement('div');
+    heart.className = 'animate-like';
+    heart.innerText = '❤️';
+    document.body.appendChild(heart);
+    heart.style.left = e.clientX + 'px';
+    heart.style.top = e.clientY + 'px';
+    setTimeout(() => heart.remove(), 800);
+}
+
+function animateComment(e) {
+    const comment = document.createElement('div');
+    comment.className = 'animate-comment';
+    comment.innerText = '💬';
+    document.body.appendChild(comment);
+    comment.style.left = e.clientX + 'px';
+    comment.style.top = e.clientY + 'px';
+    setTimeout(() => comment.remove(), 800);
+}
+
+document.querySelectorAll('.btn-like').forEach(btn => {
+    btn.addEventListener('click', animateLike);
+});
+
+document.querySelectorAll('.btn-comment').forEach(btn => {
+    btn.addEventListener('click', animateComment);
+});
+</script>
+</body>
+</html>
+<h5 class="card-title">
+  <a href="{{ url_for('profile', username=post.user) }}">{{ post.user }}</a>
+</h5>
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexa Social</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+    .animate-like, .animate-comment {
+      position: absolute;
+      font-size: 24px;
+      pointer-events: none;
+      opacity: 1;
+      transform: scale(1);
+      animation: pop 0.8s forwards;
+    }
+
+    @keyframes pop {
+      0% { opacity:1; transform: scale(1) translateY(0); }
+      50% { transform: scale(1.5) translateY(-20px); }
+      100% { opacity:0; transform: scale(2) translateY(-50px); }
+    }
+
+    .post-container { position: relative; }
+    </style>
+</head>
+<body>
+<div class="container mt-5 text-center">
+    <h3>🔥 Server is Running</h3>
+    <p>Your social platform is alive.</p>
+    <button class="btn btn-primary btn-lg mt-3">Get Started</button>
+</div>
+
+<div class="container mt-5">
+    <h2>📰 Feed</h2>
+    {% for post in posts %}
+    <div class="card mb-4 post-container">
+        {% if post.image_url %}
+        <img src="{{ post.image_url }}" class="card-img-top" alt="Post image">
+        {% endif %}
+        <div class="card-body">
+            <h5 class="card-title">
+                <a href="{{ url_for('profile', username=post.user) }}">{{ post.user }}</a>
+            </h5>
+            <p class="card-text">{{ post.content }}</p>
+            <p>❤️ {{ post.likes }} | 💬 {{ post.comments }}</p>
+
+            <form action="{{ url_for('like', post_id=post.id) }}" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-sm btn-danger btn-like">❤️ Like</button>
+            </form>
+
+            <form action="{{ url_for('comment', post_id=post.id) }}" method="post" style="display:inline;">
+                <input type="text" name="comment" placeholder="کامنت..." required>
+                <button type="submit" class="btn btn-sm btn-primary btn-comment">💬 Comment</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+function animateLike(e) {
+    const heart = document.createElement('div');
+    heart.className = 'animate-like';
+    heart.innerText = '❤️';
+    document.body.appendChild(heart);
+    heart.style.left = e.clientX + 'px';
+    heart.style.top = e.clientY + 'px';
+    setTimeout(() => heart.remove(), 800);
+}
+
+function animateComment(e) {
+    const comment = document.createElement('div');
+    comment.className = 'animate-comment';
+    comment.innerText = '💬';
+    document.body.appendChild(comment);
+    comment.style.left = e.clientX + 'px';
+    comment.style.top = e.clientY + 'px';
+    setTimeout(() => comment.remove(), 800);
+}
+
+document.querySelectorAll('.btn-like').forEach(btn => {
+    btn.addEventListener('click', animateLike);
+});
+
+document.querySelectorAll('.btn-comment').forEach(btn => {
+    btn.addEventListener('click', animateComment);
+});
+</script>
+</body>
+</html>
