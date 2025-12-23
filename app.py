@@ -1,33 +1,34 @@
 import os
 from werkzeug.utils import secure_filename
-
-UPLOAD_FOLDER = "static/uploads"
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
-
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-
-def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
+# -------------------------
+# تعریف اپلیکیشن Flask
+# -------------------------
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# مسیر آپلود
+UPLOAD_FOLDER = "static/uploads"
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+# دیتابیس
 db = SQLAlchemy(app)
 
-# مدل User
+# -------------------------
+# مدل‌ها
+# -------------------------
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     bio = db.Column(db.Text, default="")
     profile_image = db.Column(db.String(200), default="https://picsum.photos/100")
 
-# مدل Post
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user = db.Column(db.String(50), nullable=False)
@@ -37,7 +38,9 @@ class Post(db.Model):
     comments = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+# -------------------------
 # نمونه داده‌ها
+# -------------------------
 users = [
     {"username": "ekram", "bio": "عاشق برنامه‌نویسی 🚀", "profile_image": "https://picsum.photos/100/100"},
     {"username": "shuja", "bio": "دوستدار سفر و عکاسی 😎", "profile_image": "https://picsum.photos/101/100"}
@@ -48,12 +51,19 @@ posts = [
     {"id": 2, "user": "shuja", "content": "یک روز عالی در کنار دوستان 😎", "image_url": "https://picsum.photos/500/301", "likes": 7, "comments": 1}
 ]
 
-# روت اصلی
+# -------------------------
+# توابع کمکی
+# -------------------------
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# -------------------------
+# روت‌ها
+# -------------------------
 @app.route("/")
 def home():
     return render_template("home.html", posts=posts)
 
-# ایجاد پست جدید
 @app.route("/new_post", methods=["GET", "POST"])
 def new_post():
     if request.method == "POST":
@@ -73,7 +83,6 @@ def new_post():
             return redirect(url_for("home"))
     return render_template("new_post.html", users=users)
 
-# لایک پست
 @app.route("/like/<int:post_id>", methods=["POST"])
 def like(post_id):
     for post in posts:
@@ -82,7 +91,6 @@ def like(post_id):
             break
     return redirect(url_for("home"))
 
-# کامنت پست
 @app.route("/comment/<int:post_id>", methods=["POST"])
 def comment(post_id):
     comment_text = request.form.get("comment")
@@ -92,20 +100,12 @@ def comment(post_id):
             break
     return redirect(url_for("home"))
 
-# پروفایل کاربر
 @app.route("/profile/<username>")
 def profile(username):
     user_info = next((u for u in users if u["username"] == username), None)
     user_posts = [post for post in posts if post["user"] == username]
     return render_template("profile.html", user=user_info, posts=user_posts)
 
-# ساخت دیتابیس
-with app.app_context():
-    db.create_all()
-
-if __name__ == "__main__":
-    app.run(debug=True)
-# ویرایش پست
 @app.route("/edit_post/<int:post_id>", methods=["GET", "POST"])
 def edit_post(post_id):
     post = next((p for p in posts if p["id"] == post_id), None)
@@ -128,9 +128,17 @@ def edit_post(post_id):
 
     return render_template("edit_post.html", post=post)
 
-# حذف پست
 @app.route("/delete_post/<int:post_id>", methods=["POST"])
 def delete_post(post_id):
     global posts
     posts = [p for p in posts if p["id"] != post_id]
     return redirect(url_for("home"))
+
+# -------------------------
+# ایجاد دیتابیس و اجرای سرور
+# -------------------------
+with app.app_context():
+    db.create_all()
+
+if __name__ == "__main__":
+    app.run(debug=True)
